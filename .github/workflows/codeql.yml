@@ -1,0 +1,55 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '30 5 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 360
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java-kotlin' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Install Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Install Gradle
+      uses: gradle/actions/setup-gradle@v3
+
+    - name: Install Ghidra
+      uses: antoniovazquezblanco/setup-ghidra@v2.0.4
+      with:
+        auth_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build
+      run: gradle buildExtension
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
