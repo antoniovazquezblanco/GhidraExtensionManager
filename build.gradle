@@ -47,12 +47,23 @@ else {
 }
 //----------------------END "DO NOT MODIFY" SECTION-------------------------------
 
+buildExtension.exclude '.github/'
+buildExtension.exclude 'doc/'
+buildExtension.exclude 'README.md'
+
 repositories {
 }
 
 dependencies {
 }
 
-buildExtension.exclude '.github/'
-buildExtension.exclude 'doc/'
-buildExtension.exclude 'README.md'
+def download(url, file) {
+	def f = new File(file)
+	new URL(url).withInputStream{ i -> f.withOutputStream{ it << i }}
+}
+
+task updateCatalog() {
+	download("https://github.com/antoniovazquezblanco/GhidraExtensionManagerRepository/releases/download/latest/catalog.json", "data/catalog.json")
+}
+
+buildExtension.dependsOn updateCatalog
