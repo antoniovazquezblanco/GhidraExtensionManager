@@ -38,7 +38,7 @@ public class CatalogUtils {
 		return null;
 	}
 
-	public static void update() {
+	public static boolean update() {
 		log.trace("Updating catalog...");
 		try {
 			File file = getCatalogFile();
@@ -46,6 +46,9 @@ public class CatalogUtils {
 					"https://github.com/antoniovazquezblanco/GhidraExtensionManagerRepository/releases/download/latest/catalog.json")
 					.toURL();
 			FileUtils.copyURLToFile(url, file);
+			// Force reload of catalog after update
+			loadCatalog();
+			return true;
 		} catch (MalformedURLException | URISyntaxException e) {
 			log.error(e);
 			// TODO Auto-generated catch block
@@ -55,6 +58,7 @@ public class CatalogUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return false;
 	}
 
 	private static void loadCatalog() {

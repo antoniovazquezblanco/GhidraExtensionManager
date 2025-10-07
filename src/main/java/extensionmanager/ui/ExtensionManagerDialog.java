@@ -138,8 +138,12 @@ public class ExtensionManagerDialog extends ReusableDialogComponentProvider {
 
 			@Override
 			public void actionPerformed(ActionContext context) {
-				CatalogUtils.update();
-				tablePanel.refreshTable();
+				if (CatalogUtils.update()) {
+					tablePanel.refreshTable();
+				} else {
+					Msg.showError(this, null, "Update Failed",
+							"Failed to update the extension catalog. Please check your internet connection and try again.");
+				}
 			}
 		};
 		String group = "extensionTools";
