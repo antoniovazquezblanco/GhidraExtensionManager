@@ -30,7 +30,7 @@ import docking.action.MenuData;
 import docking.action.ToolBarData;
 import docking.widgets.filechooser.GhidraFileChooser;
 import docking.widgets.filechooser.GhidraFileChooserMode;
-import extensionmanager.catalog.CatalogUtils;
+import extensionmanager.task.CatalogUpdateTask;
 import generic.jar.ResourceFile;
 import ghidra.framework.Application;
 import ghidra.framework.plugintool.PluginTool;
@@ -45,24 +45,26 @@ public class ExtensionManagerDialog extends ReusableDialogComponentProvider {
 
 	private static final String LAST_IMPORT_DIRECTORY_KEY = "LastExtensionImportDirectory";
 
-	AvailableExtensionsPannel extensionTablePanel;
+	private PluginTool mTool;
+	AvailableExtensionsPannel mExtensionTablePanel;
 
 	private boolean requireRestart = false;
 
 	public ExtensionManagerDialog(PluginTool tool) {
 		super("Extension Manager");
+		mTool = tool;
 		addWorkPanel(createMainPanel(tool));
 	}
 
 	private JComponent createMainPanel(PluginTool tool) {
 		JPanel panel = new JPanel(new BorderLayout());
 
-		extensionTablePanel = new AvailableExtensionsPannel(tool);
-		panel.add(extensionTablePanel, BorderLayout.CENTER);
+		mExtensionTablePanel = new AvailableExtensionsPannel(tool);
+		panel.add(mExtensionTablePanel, BorderLayout.CENTER);
 
-		createAddAction(extensionTablePanel);
-		createRefreshAction(extensionTablePanel);
-		createUpdateCatalogAction(extensionTablePanel);
+		createAddAction(mExtensionTablePanel);
+		createRefreshAction(mExtensionTablePanel);
+		createUpdateCatalogAction(mExtensionTablePanel);
 
 		addOKButton();
 
@@ -138,7 +140,9 @@ public class ExtensionManagerDialog extends ReusableDialogComponentProvider {
 
 			@Override
 			public void actionPerformed(ActionContext context) {
-				if (CatalogUtils.update()) {
+				CatalogUpdateTask task = new CatalogUpdateTask();
+				mTool.execute(task);
+				if (task.isSuccess()) {
 					tablePanel.refreshTable();
 				} else {
 					Msg.showError(this, null, "Update Failed",
@@ -163,7 +167,7 @@ public class ExtensionManagerDialog extends ReusableDialogComponentProvider {
 	protected void dialogClosed() {
 		super.dialogClosed();
 
-		if (extensionTablePanel.getTableModel().hasModelChanged() || requireRestart) {
+		if (mExtensionTablePanel.getTableModel().hasModelChanged() || requireRestart) {
 			Msg.showInfo(this, null, "Extensions Changed!",
 					"Please restart Ghidra for extension changes to take effect.");
 		}
