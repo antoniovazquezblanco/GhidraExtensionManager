@@ -29,6 +29,10 @@
 // application.gradle.version property in <GHIDRA_INSTALL_DIR>/Ghidra/application.properties
 // for the correction version of Gradle to use for the Ghidra installation you specify.
 
+plugins {
+    id 'com.palantir.git-version' version '3.0.0'
+}
+
 //----------------------START "DO NOT MODIFY" SECTION------------------------------
 def ghidraInstallDir
 
@@ -52,18 +56,38 @@ buildExtension.exclude 'doc/'
 buildExtension.exclude 'README.md'
 
 repositories {
+    mavenCentral()
 }
 
 dependencies {
+    implementation 'org.kohsuke:github-api:1.330'
 }
+
+task generateVersionFile {
+    doLast {
+        def version = gitVersion()
+        def escapedVersion = version.replaceAll("\"", "\\\\\"")
+        def packageDir = new File(sourceSets.main.java.srcDirs.first(), 'extensionmanager')
+        packageDir.mkdirs()
+        def versionFile = new File(packageDir, 'ExtensionManagerVersion.java')
+        versionFile.text = "package extensionmanager;\n\n" + \
+                           "public class ExtensionManagerVersion {\n" + \
+                           "    public static final String GIT_VERSION = \"${escapedVersion}\";\n" + \
+                           "}\n"
+    }
+}
+
+compileJava.dependsOn generateVersionFile
 
 def download(url, file) {
 	def f = new File(file)
 	new URL(url).withInputStream{ i -> f.withOutputStream{ it << i }}
 }
 
-task updateCatalog() {
-	download("https://github.com/antoniovazquezblanco/GhidraExtensionManagerRepository/releases/download/latest/catalog.json", "data/catalog.json")
+task updateCatalog {
+	doLast {
+		download("https://github.com/antoniovazquezblanco/GhidraExtensionManagerRepository/releases/download/latest/catalog.json", "data/catalog.json")
+	}
 }
 
 buildExtension.dependsOn updateCatalog

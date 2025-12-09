@@ -4,6 +4,7 @@ import docking.ActionContext;
 import docking.action.DockingAction;
 import docking.action.MenuData;
 import docking.tool.ToolConstants;
+import extensionmanager.task.SelfUpdateTask;
 import extensionmanager.ui.ExtensionManagerDialog;
 import ghidra.app.CorePluginPackage;
 import ghidra.app.plugin.PluginCategoryNames;
@@ -60,6 +61,7 @@ public class ExtensionManagerPlugin extends ProgramPlugin implements Application
 	}
 
 	private void openExtensionManager() {
+		tool.execute(new SelfUpdateTask());
 		if (extensionManagerDialog == null) {
 			extensionManagerDialog = new ExtensionManagerDialog(tool);
 		}

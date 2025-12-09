@@ -1,3 +1,4 @@
+# Java, eclipse and Gradle
 .project
 .pyproject
 .classpath
@@ -8,3 +9,6 @@ build/
 dist/
 *.swp
 .antProperties.xml
+
+# Generated code
+src/main/java/extensionmanager/ExtensionManagerVersion.java
