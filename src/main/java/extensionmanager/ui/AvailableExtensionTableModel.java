@@ -29,6 +29,8 @@ import ghidra.util.table.column.GColumnRenderer;
 import ghidra.util.task.TaskMonitor;
 
 class AvailableExtensionTableModel extends ThreadedTableModel<ExtensionDetails, Object> {
+
+	private static final long serialVersionUID = 7081260710920183727L;
 	final static int INSTALLED_COL = 0;
 	final static int NAME_COL = 1;
 
@@ -339,6 +341,8 @@ class AvailableExtensionTableModel extends ThreadedTableModel<ExtensionDetails, 
 	}
 
 	private class ExtRenderer extends AbstractGColumnRenderer<String> {
+
+		private static final long serialVersionUID = -3317456845964697608L;
 
 		@Override
 		public Component getTableCellRendererComponent(GTableCellRenderingData data) {

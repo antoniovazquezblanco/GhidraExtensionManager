@@ -16,6 +16,7 @@ import ghidra.util.extensions.ExtensionDetails;
 
 public class AvailableExtensionsPannel extends JPanel {
 
+	private static final long serialVersionUID = -8712185000079988214L;
 	private GTableFilterPanel<ExtensionDetails> tableFilterPanel;
 	private AvailableExtensionTableModel tableModel;
 	private GTable table;
