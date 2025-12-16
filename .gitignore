@@ -1,14 +1,20 @@
-# Java, eclipse and Gradle
-.project
-.pyproject
-.classpath
-.settings/
-.gradle/
+# Output files
 bin/
-build/
 dist/
-*.swp
-.antProperties.xml
+build/
+
+# JDT
+.classpath
+
+# Gradle
+.gradle
+
+# Eclipse
+.project
+.settings
+
+# MAC OS
+.DS_Store
 
 # Generated code
 src/main/java/extensionmanager/ExtensionManagerVersion.java
