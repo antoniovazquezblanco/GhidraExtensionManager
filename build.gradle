@@ -30,7 +30,7 @@
 // for the correction version of Gradle to use for the Ghidra installation you specify.
 
 plugins {
-    id 'com.palantir.git-version' version '4.2.0'
+    id 'com.palantir.git-version' version '4.3.0'
 }
 
 //----------------------START "DO NOT MODIFY" SECTION------------------------------
