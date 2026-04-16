@@ -13,12 +13,12 @@ public class Catalog {
 	Date date;
 	List<Extension> extensions;
 
-	public static Catalog parse(Reader reader) {
+	public static Catalog parse(Reader reader) throws CatalogVersionException {
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.S").create();
 		Catalog catalog = gson.fromJson(reader, new TypeToken<Catalog>() {
 		}.getType());
 		if (catalog.version != 0)
-			throw new RuntimeException("Cannot parse catalog version. Please upgrade the extension.");
+			throw new CatalogVersionException();
 		return catalog;
 	}
 }
