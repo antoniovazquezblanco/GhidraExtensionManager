@@ -12,6 +12,7 @@ import docking.widgets.table.GTableCellRenderingData;
 import docking.widgets.table.TableColumnDescriptor;
 import docking.widgets.table.threaded.ThreadedTableModel;
 import extensionmanager.catalog.CatalogUtils;
+import extensionmanager.utils.ExtensionMerger;
 import extensionmanager.utils.OnlineExtensionDetails;
 import extensionmanager.utils.OnlineExtensionInstaller;
 import generic.jar.ResourceFile;
@@ -145,18 +146,10 @@ class AvailableExtensionTableModel extends ThreadedTableModel<ExtensionDetails, 
 		Set<ExtensionDetails> installed = ExtensionUtils.getInstalledExtensions();
 		Set<OnlineExtensionDetails> online = CatalogUtils.getCurrentVersionExtensions();
 
-		// don't show archived extensions that have been installed
-		for (ExtensionDetails extension : installed) {
-			if (archived.remove(extension)) {
-				Msg.trace(this, "Not showing archived extension that has been installed.  Archive path: "
-						+ extension.getArchivePath()); // useful for debugging
-			}
-		}
-
-		extensions = new HashSet<>();
-		extensions.addAll(installed);
-		extensions.addAll(archived);
-		extensions.addAll(online);
+		// Merge the sources into one row per extension (installed > archived > online),
+		// deduping across the ExtensionDetails/OnlineExtensionDetails class boundary that
+		// ExtensionDetails.equals() does not bridge.
+		extensions = ExtensionMerger.merge(installed, archived, online);
 
 		for (ExtensionDetails e : extensions) {
 			String name = e.getName();
