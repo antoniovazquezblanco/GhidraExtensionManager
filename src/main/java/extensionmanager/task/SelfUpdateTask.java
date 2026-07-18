@@ -14,6 +14,10 @@ import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubAbuseLimitHandler;
+import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.GitHubRateLimitHandler;
+import org.kohsuke.github.RateLimitChecker;
 
 import docking.widgets.OptionDialog;
 import extensionmanager.ExtensionManagerVersion;
@@ -123,7 +127,11 @@ public class SelfUpdateTask extends Task {
 	private static VersionInfo getLatestPluginInfo(TaskMonitor monitor, String ghidraVersion) throws CancelledException {
 		monitor.checkCancelled();
 		try {
-			GitHub github = GitHub.connectAnonymously();
+			GitHub github = connect();
+			monitor.checkCancelled();
+			if (isRateLimited(github)) {
+				return null;
+			}
 			monitor.checkCancelled();
 			GHRepository repo = github.getRepository(REPO_OWNER + "/" + REPO_NAME);
 			monitor.checkCancelled();
@@ -151,6 +159,37 @@ public class SelfUpdateTask extends Task {
 			log.error("Failed to get latest plugin info", e);
 			return null;
 		}
+	}
+
+	/**
+	 * Connects to GitHub anonymously with fail-fast throttling: the client never
+	 * blocks waiting for a rate-limit reset or a secondary (abuse) back-off, so the
+	 * background check always terminates promptly.
+	 */
+	private static GitHub connect() throws IOException {
+		return new GitHubBuilder()
+				.withRateLimitHandler(GitHubRateLimitHandler.FAIL)
+				.withAbuseLimitHandler(GitHubAbuseLimitHandler.FAIL)
+				.withRateLimitChecker(RateLimitChecker.NONE)
+				.build();
+	}
+
+	/**
+	 * Detects whether the anonymous GitHub API budget is already exhausted. The
+	 * {@code /rate_limit} endpoint does not consume quota, so this is a cheap
+	 * pre-check that lets us skip a distant reset instead of blocking on it.
+	 *
+	 * @return {@code true} if no budget remains (and logs when the limit resets)
+	 */
+	private static boolean isRateLimited(GitHub github) throws IOException {
+		var core = github.getRateLimit().getCore();
+		if (core.getRemaining() > 0) {
+			return false;
+		}
+		long secondsUntilReset = core.getResetEpochSeconds() - System.currentTimeMillis() / 1000L;
+		log.warn("GitHub rate limit reached ({} req/hr); skipping self-update check, resets in ~{} s.",
+				core.getLimit(), Math.max(0, secondsUntilReset));
+		return true;
 	}
 
 	/**
