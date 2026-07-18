@@ -49,7 +49,7 @@ public class SelfUpdateTask extends Task {
 	}
 
 	public SelfUpdateTask() {
-		super("Extension Manager self update task", false, true, true);
+		super("Extension Manager self update task", false, true, false);
 	}
 
 	@Override
