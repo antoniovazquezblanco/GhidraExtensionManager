@@ -91,3 +91,40 @@ task updateCatalog {
 }
 
 buildExtension.dependsOn updateCatalog
+
+// Ghidra's per-user extension directory
+def ghidraUserExtensionDir = {
+	def props = new Properties()
+	file("${ghidraInstallDir}/Ghidra/application.properties").withInputStream { props.load(it) }
+	def versioned = "ghidra_${props.getProperty('application.version')}_" +
+			"${props.getProperty('application.release.name').toUpperCase()}"
+	def configHome = System.getenv('XDG_CONFIG_HOME') ?: "${System.getProperty('user.home')}/.config"
+	return file("${configHome}/ghidra/${versioned}/Extensions")
+}()
+
+// Captured at configuration time so task actions never touch Task.project at execution.
+def installedExtensionDir = new File(ghidraUserExtensionDir, project.name)
+
+task uninstallExtension(type: Delete) {
+	group = 'ghidra'
+	description = 'Removes this extension from the target Ghidra installation.'
+	delete installedExtensionDir
+}
+
+task installExtension(type: Copy) {
+	group = 'ghidra'
+	description = 'Builds the extension and installs it into the target Ghidra installation.'
+	// Rebuild, and wipe any previous copy first so files removed between builds don't linger.
+	dependsOn buildExtension, uninstallExtension
+	from zipTree(buildExtension.archiveFile)
+	into ghidraUserExtensionDir
+	doLast { println "[*] Installed into ${installedExtensionDir}" }
+}
+
+task runInGhidra(type: Exec) {
+	group = 'ghidra'
+	description = 'Installs the extension and launches Ghidra (blocks until Ghidra exits).'
+	dependsOn installExtension
+	def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
+	executable = new File(ghidraInstallDir, isWindows ? 'ghidraRun.bat' : 'ghidraRun')
+}
