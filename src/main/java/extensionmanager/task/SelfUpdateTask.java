@@ -22,6 +22,7 @@ import org.kohsuke.github.RateLimitChecker;
 import docking.widgets.OptionDialog;
 import extensionmanager.ExtensionManagerVersion;
 import extensionmanager.utils.OnlineExtensionInstaller;
+import extensionmanager.utils.VersionComparator;
 import ghidra.framework.Application;
 import ghidra.util.Msg;
 import ghidra.util.exception.CancelledException;
@@ -66,7 +67,7 @@ public class SelfUpdateTask extends Task {
 		}
 
 		log.info(String.format("Got extension manager version info: %s", latestVersion.getVersion()));
-		if (!isNewerVersion(latestVersion.getVersion(), ExtensionManagerVersion.GIT_VERSION)) {
+		if (!VersionComparator.isNewer(latestVersion.getVersion(), ExtensionManagerVersion.GIT_VERSION)) {
 			log.info("Extension Manager is up to date.");
 			return;
 		}
@@ -89,25 +90,6 @@ public class SelfUpdateTask extends Task {
 	
 	public boolean askYesNo(String title, String question) {
 		return OptionDialog.showYesNoDialog(null, title, question) == OptionDialog.OPTION_ONE;
-	}
-
-	private static boolean isNewerVersion(String latest, String current) {
-		String latestVer = latest.startsWith("v") ? latest.substring(1) : latest;
-		String currentVer = current.startsWith("v") ? current.substring(1) : current;
-		// Take only the version part before any dash
-		latestVer = latestVer.split("-")[0];
-		currentVer = currentVer.split("-")[0];
-		String[] latestParts = latestVer.split("\\.");
-		String[] currentParts = currentVer.split("\\.");
-		for (int i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
-			int l = i < latestParts.length ? Integer.parseInt(latestParts[i]) : 0;
-			int c = i < currentParts.length ? Integer.parseInt(currentParts[i]) : 0;
-			if (l > c)
-				return true;
-			if (l < c)
-				return false;
-		}
-		return false; // equal
 	}
 
 	private static VersionInfo getLatestPluginInfo(TaskMonitor monitor) throws CancelledException {
