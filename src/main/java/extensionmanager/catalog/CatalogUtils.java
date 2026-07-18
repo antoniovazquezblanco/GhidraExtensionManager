@@ -77,24 +77,27 @@ public class CatalogUtils {
 	public static Date getCatalogDate() {
 		if (catalog == null)
 			loadCatalog();
-		return catalog.date;
+		return catalog.getDate();
 	}
 
 	public static Set<OnlineExtensionDetails> getExtensions(String ghidraVersion) {
 		if (catalog == null)
 			loadCatalog();
 		Set<OnlineExtensionDetails> extensions = new HashSet<OnlineExtensionDetails>();
-		for (Extension e : catalog.extensions) {
-			for (ExtensionVersion v : e.versions) {
-				if (v.version.equals(ghidraVersion)) {
-					try {
-						extensions.add(new OnlineExtensionDetails(e.name, e.description, e.author, e.created_on,
-								v.version, v.url));
-					} catch (MalformedURLException | URISyntaxException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-						log.error(e1);
-					}
+		for (Extension e : catalog.getExtensions()) {
+			for (ExtensionVersion v : e.getVersions()) {
+				if (!ghidraVersion.equals(v.getGhidraVersion()))
+					continue;
+				String url = v.getUrl();
+				if (url == null)
+					continue;
+				try {
+					extensions.add(new OnlineExtensionDetails(e.getName(), e.getDescription(), e.getAuthor(),
+							e.getCreatedOn(), v.getGhidraVersion(), url));
+				} catch (MalformedURLException | URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					log.error(e1);
 				}
 			}
 		}
