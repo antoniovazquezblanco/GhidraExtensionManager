@@ -2,6 +2,7 @@
 
 [![Build](https://github.com/antoniovazquezblanco/GhidraExtensionManager/actions/workflows/main.yml/badge.svg)](https://github.com/antoniovazquezblanco/GhidraExtensionManager/actions/workflows/main.yml)
 [![CodeQL](https://github.com/antoniovazquezblanco/GhidraExtensionManager/actions/workflows/codeql.yml/badge.svg)](https://github.com/antoniovazquezblanco/GhidraExtensionManager/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/antoniovazquezblanco/GhidraExtensionManager/badge)](https://scorecard.dev/viewer/?uri=github.com/antoniovazquezblanco/GhidraExtensionManager)
 
 <p align="center">
   <img width="400" src="doc/logo.png" alt="Three headed Ghidra guards some crates">
